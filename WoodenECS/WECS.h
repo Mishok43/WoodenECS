@@ -58,7 +58,7 @@ public:
 	}
 
 	template<typename F, typename HeadComponentT, typename... LeftComponentTs>
-	void for_each(F&& func)
+	void for_each(F&& func, type_list<HeadComponentT, LeftComponentTs...>&&)
 	{
 		WComponents* headCompsWrapper = getComponentsWrapper<HeadComponentT>();
 		HComponentStorage<HeadComponentT>* headCompsStorage = storage_cast<HeadComponentT>(headCompsWrapper->storage);

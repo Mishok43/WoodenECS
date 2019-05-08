@@ -165,10 +165,10 @@ namespace
 		TestComponent1& a2 = ecs.getComponent<TestComponent1>(3);
 		ASSERT_EQ(a2.x, 35);
 
-		ecs.for_each<TestComponent1>([](TestComponent1& t)
+		ecs.for_each([](TestComponent1& t)
 		{
 			t.x = 0;
-		});
+		}, type_list<TestComponent1>());
 
 		for (size_t i = 0; i < 32; ++i)
 		{
@@ -212,11 +212,38 @@ namespace
 		ASSERT_EQ(ecs.getNumbrComponents<TestComponent1>(), 32/2);
 
 		bool check = true;
-		ecs.for_each<TestComponent1>([&check](TestComponent1& c)
+		ecs.for_each([&check](TestComponent1& c)
 		{
 			check &= c.flag == false;
-		});
+		}, type_list<TestComponent1>());
 
+		ASSERT_TRUE(check);
+	}
+
+	TEST(ECS, ForEach)
+	{
+		WECS ecs;
+		ecs.registerComponent<TestComponent1>();
+		ecs.registerComponent<TestComponent2>();
+		for (size_t i = 0; i < 32; ++i)
+		{
+			bool flag = (bool)(i % 2 == 0);
+			ecs.addComponent<TestComponent1>(i, i, 12 * i, flag);
+			if (flag)
+			{
+				ecs.addComponent<TestComponent2>(i);
+			}
+		}
+
+		int num = 0;
+		bool check = true;
+		ecs.for_each([&num, &check](TestComponent1& c1, TestComponent2& c2)
+		{
+			++num;
+			check &= (c1.x % 2) == 0;
+		}, type_list<TestComponent1, TestComponent2>());
+
+		ASSERT_EQ(num, 16);
 		ASSERT_TRUE(check);
 	}
 
