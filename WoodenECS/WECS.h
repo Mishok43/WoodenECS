@@ -2,6 +2,7 @@
 #include "DComponent.h"
 #include "DIndexTable.h"
 #include "WComponents.h"
+#include "MHandleManager.h"
 #include "ECSTypeTraits.h"
 #include "SSEHashMap/phmap.h"
 
@@ -9,12 +10,10 @@ using FUpdate = std::function<void(float)>;
 
 WECS_BEGIN
 
-
 class WECS
 {
 public:
 	using this_type = typename WECS;
-
 
 	template<typename ComponentT, typename IndexTable = DIndexTableFlat>
 	void registerComponent()
@@ -93,6 +92,21 @@ public:
 		return storage_cast<ComponentT>(compWrapper->storage);
 	}
 
+	inline size_t createEntity()
+	{
+		return handleManager.allocate();
+	}
+
+	template<typename... T>
+	inline void w(T... arg){ }
+
+	template<typename... ComponentTs>
+	inline void removeEntity(size_t hEntity)
+	{
+		w(removeComponentVariadic<ComponentTs>(hEntity)...);
+
+		handleManager.deallocate(hEntity);
+	}
 
 	template<typename Component, typename... Args>
 	Component& addComponent(size_t hEntity, Args&&... args)
@@ -147,6 +161,14 @@ public:
 		}
 	}
 	
+	template<typename Component>
+	int removeComponentVariadic(size_t hEntity)
+	{
+		WComponents* compWrapper = getComponentsWrapper<Component>();
+		removeComponent(compWrapper->indices->get(hEntity), compWrapper);
+		return 0;
+	}
+
 	template<typename Component>
 	void removeComponent(size_t hEntity)
 	{
@@ -347,10 +369,9 @@ protected:
 		return componentsMap[&typeid(Component)];
 	}
 
-
-
 	std::vector<WComponents*> components;
 	std::vector<FUpdate> updateFuncs;
+	MHandleManager handleManager;
 	phmap::flat_hash_map<const std::type_info*, WComponents*> componentsMap;
 };
 

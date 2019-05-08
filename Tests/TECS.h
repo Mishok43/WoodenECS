@@ -7,12 +7,17 @@
 using namespace wecs;
 	struct TestComponent1
 	{
+		TestComponent1()
+		{}
+
 
 		TestComponent1(int _x, int _y, bool _old=false):
 			x(_x), y(_y), flag(_old)
 		{ }
 
-		int x, y; bool flag;
+		int x;
+		int y;
+		bool flag;
 	};
 
 	struct TestComponent2
@@ -245,6 +250,23 @@ namespace
 
 		ASSERT_EQ(num, 16);
 		ASSERT_TRUE(check);
+	}
+
+	TEST(ECS, HandleManager)
+	{
+		WECS ecs;
+		ecs.registerComponent<TestComponent1>();
+		ecs.registerComponent<TestComponent2>();
+
+		size_t hEntity = ecs.createEntity();
+		ecs.addComponent<TestComponent1>(hEntity);
+		ecs.addComponent<TestComponent2>(hEntity);
+
+
+		ecs.removeEntity<TestComponent1, TestComponent2>(hEntity);
+
+		size_t hEntity2 = ecs.createEntity();
+		ASSERT_EQ(hEntity, hEntity2);
 	}
 
 
