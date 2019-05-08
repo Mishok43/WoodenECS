@@ -57,13 +57,22 @@ public:
 		}
 	}
 
-	template<typename ComponentT, typename F>
+	template<typename F, typename HeadComponentT, typename... LeftComponentTs>
 	void for_each(F&& func)
 	{
-		HComponentStorage<ComponentT>* storage = getComponentStorage<ComponentT>();
-		for (ComponentT& c : *storage)
+		WComponents* headCompsWrapper = getComponentsWrapper<HeadComponentT>();
+		HComponentStorage<HeadComponentT>* headCompsStorage = storage_cast<HeadComponentT>(headCompsWrapper->storage);
+		
+		WGatherComponents<0, LeftComponentTs...> gather(*this);
+
+		for (size_t hComp = 0; hComp < headCompsStorage->size(); ++hComp)
 		{
-			func(c);
+			HeadComponentT& headComp = (*headCompsStorage)[hComp];
+			size_t hEntity = headCompsStorage->getEntityHandle(hComp);
+			if (gather.setupCmpsDataForEntity(hEntity))
+			{
+				func(headComp, gather.getComp<LeftComponentTs>()...);
+			}
 		}
 	}
 

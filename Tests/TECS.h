@@ -7,7 +7,6 @@
 using namespace wecs;
 	struct TestComponent1
 	{
-		TestComponent1(){ }
 
 		TestComponent1(int _x, int _y, bool _old=false):
 			x(_x), y(_y), flag(_old)
