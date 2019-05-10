@@ -6,32 +6,30 @@
 
 WECS_BEGIN
 
-__declspec(novtable) class DIndexTable
+//__declspec(novtable) class DIndexTable
+//{
+//public:
+//	virtual void init(DComponentStorage* compStorage) = 0;
+//	virtual size_t insert(size_t hEntity) = 0;
+//	virtual inline bool exists(size_t hEntity) const = 0;
+//	virtual inline size_t get(size_t hEntity) const = 0;
+//	virtual size_t remove(size_t hEntity) = 0;
+//	virtual size_t removeByIndex(size_t hComp) = 0;
+//	virtual inline void clear() = 0;
+//	virtual inline size_t size() const = 0;
+//};
+
+
+class DIndexTableFlat
 {
 public:
-	virtual void init() = 0;
-	virtual size_t insert(size_t hEntity) = 0;
-	virtual inline bool exists(size_t hEntity) const = 0;
-	virtual inline size_t get(size_t hEntity) const = 0;
-	virtual size_t remove(size_t hEntity) = 0;
-	virtual size_t removeByIndex(size_t hComp) = 0;
-	virtual inline void clear() = 0;
-	virtual inline size_t size() const = 0;
-};
-
-class DIndexTableFlat: public DIndexTable
-{
-public:
-	explicit DIndexTableFlat(DComponentStorage* compStorage):
-		compStorage(compStorage)
-	{}
-
-	void init() override
+	void init(DComponentStorage* _compStorage) 
 	{
 		indices.resize(8, INVALID_HANDLE);
+		compStorage = _compStorage;
 	}
 
-	size_t insert(size_t hEntity) override
+	size_t insert(size_t hEntity) 
 	{
 		assert(!exists(hEntity));
 
@@ -50,7 +48,7 @@ public:
 		return index;
 	}
 
-	size_t remove(size_t hEntity) override
+	size_t remove(size_t hEntity) 
 	{
 		size_t deadPos = indices[hEntity];
 
@@ -72,7 +70,7 @@ public:
 		return deadPos;
 	}
 
-	size_t removeByIndex(size_t hComp) override
+	size_t removeByIndex(size_t hComp) 
 	{
 #ifdef _DEBUG
 		if (hComp >= size())
@@ -93,7 +91,7 @@ public:
 	}
 
 
-	inline bool exists(size_t hEntity) const override
+	inline bool exists(size_t hEntity) const 
 	{
 		if (hEntity >= indices.size())
 			return false;
@@ -101,7 +99,7 @@ public:
 		return indices[hEntity] != INVALID_HANDLE;
 	}
 	
-	inline size_t get(size_t hEntity) const override
+	inline size_t get(size_t hEntity) const 
 	{
 		if (hEntity >= indices.size())
 			return INVALID_HANDLE;
@@ -109,13 +107,13 @@ public:
 		return indices[hEntity];
 	}
 
-	inline void clear() override
+	inline void clear() 
 	{
 		indices.clear();
 		compStorage->clear();
 	}
 
-	inline size_t size() const override
+	inline size_t size() const 
 	{
 		return compStorage->size();
 	}
@@ -127,20 +125,16 @@ protected:
 
 
 
-class DIndexTableHash : public DIndexTable
+class DIndexTableHash 
 {
 public:
-	explicit DIndexTableHash(DComponentStorage* compStorage) :
-		compStorage(compStorage)
+
+	void init(DComponentStorage* _compStorage) 
 	{
+		compStorage = _compStorage;
 	}
 
-	void init() override
-	{
-
-	}
-
-	size_t insert(size_t hEntity) override
+	size_t insert(size_t hEntity) 
 	{
 		assert(!exists(hEntity));
 
@@ -150,7 +144,7 @@ public:
 		return index;
 	}
 
-	size_t remove(size_t hEntity) override
+	size_t remove(size_t hEntity) 
 	{
 		phmap::flat_hash_map<uint32_t, uint32_t>::iterator iEntity = indices.find(hEntity);
 		size_t deadPos = iEntity->second;
@@ -169,7 +163,7 @@ public:
 		return deadPos;
 	}
 
-	size_t removeByIndex(size_t hComp) override
+	size_t removeByIndex(size_t hComp) 
 	{
 		if (hComp >= size())
 		{
@@ -189,12 +183,12 @@ public:
 	}
 
 
-	inline bool exists(size_t hEntity) const override
+	inline bool exists(size_t hEntity) const 
 	{
 		return indices.find(hEntity) != indices.cend();
 	}
 
-	inline size_t get(size_t hEntity) const override
+	inline size_t get(size_t hEntity) const 
 	{
 		phmap::flat_hash_map<uint32_t, uint32_t>::const_iterator it = indices.find(hEntity);
 		if(it == indices.cend())
@@ -203,13 +197,13 @@ public:
 		return it->second;
 	}
 
-	inline void clear() override
+	inline void clear() 
 	{
 		indices.clear();
 		compStorage->clear();
 	}
 
-	inline size_t size() const override
+	inline size_t size() const 
 	{
 		return compStorage->size();
 	}

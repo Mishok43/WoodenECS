@@ -149,9 +149,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Component.h" />
     <ClInclude Include="DComponent.h" />
     <ClInclude Include="DIndexTable.h" />
     <ClInclude Include="ECSTypeTraits.h" />
+    <ClInclude Include="MMessageManager.h" />
     <ClInclude Include="WComponents.h" />
     <ClInclude Include="SSEHashMap\meminfo.h" />
     <ClInclude Include="SSEHashMap\phmap.h" />

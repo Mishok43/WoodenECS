@@ -66,6 +66,7 @@ struct has_cmp_update_s<ST, TimeT, type_list<ComponentTs...>>
 template<typename ST, typename TypeListT, typename TimeT>
 constexpr bool has_cmp_update = has_cmp_update_s<ST, TimeT, TypeListT>::value;
 
+
 template<typename S, typename... Args>
 constexpr decltype(std::declval<S>().create(std::declval<Args>()...), true) has_create_f(int){ return true;}
 
@@ -84,5 +85,13 @@ constexpr bool has_destroy_f(...){ return false;}
 template<typename ST, typename ComponentT>
 constexpr bool has_destroy = has_destroy_f<ST, ComponentT&>(1);
 
+template<typename S, typename... Args>
+constexpr decltype(std::declval<S>().on(std::declval<Args>()...), true) has_message_f(int){ return true;}
+
+template<typename S, typename... Args>
+constexpr bool has_message_f(...){ return false;}
+
+template<typename ST, typename MessageT>
+constexpr bool has_message = has_message_f<ST, MessageT&>(1);
 WECS_END
 

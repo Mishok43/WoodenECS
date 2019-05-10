@@ -7,41 +7,27 @@ WECS_BEGIN
 
 using FDestroy = std::function<void(void*)>;
 using FCreate = std::function<void(size_t, void*)>;
-class WComponents
+
+template<typename ComponentT, uint16_t defNumObjects, typename DIntexTableT = DIndexTableFlat>
+class WComponents: public HComponentStorage<ComponentT>
 {
 public:
 	WComponents()
-	{}
+	{
+		indices.init(this);
+		DComponentStorage::reserve(defNumObjects);
+	}
 
 	WComponents(const WComponents& wc) = delete;
 	WComponents operator =(const WComponents& wc) = delete;
 	WComponents& operator =(WComponents wc) = delete;
 
-	WComponents(WComponents&& wc) :
-		storage(wc.storage),
-		indices(wc.indices),
-		createFuncs(std::move(wc.createFuncs)),
-		destroyFuncs(std::move(wc.destroyFuncs))
-	{}
-
-	WComponents operator =(WComponents&& wc)
+	void* getByEntityHandleRaw(size_t hEntity)
 	{
-		WComponents wcomp(std::move(wc));
-		return wcomp;
-	}
-
-	~WComponents()
-	{
-		delete storage;
-		delete indices;
-	}
-
-	void* getRaw(size_t hEntity)
-	{
-		size_t hComp = indices->get(hEntity);
+		size_t hComp = indices.get(hEntity);
 		if (hComp != INVALID_HANDLE)
 		{
-			return storage->getRaw(hComp);
+			return DComponentStorage::getRaw(hComp);
 		}
 		else
 		{
@@ -49,12 +35,12 @@ public:
 		}
 	}
 
-	const void* getRaw(size_t hEntity) const
+	const void* getByEntityHandleRaw(size_t hEntity) const
 	{
-		size_t hComp = indices->get(hEntity);
+		size_t hComp = indices.get(hEntity);
 		if (hComp != INVALID_HANDLE)
 		{
-			return storage->getRaw(hComp);
+			return getRaw(hComp);
 		}
 		else
 		{
@@ -62,8 +48,33 @@ public:
 		}
 	}
 
-	DComponentStorage* storage;
-	DIndexTable* indices;
+	ComponentT* getByEntityHandle(size_t hEntity)
+	{
+		size_t hComp = indices.get(hEntity);
+		if (hComp != INVALID_HANDLE)
+		{
+			return get(hComp);
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+
+	ComponentT* getByEntityHandle(size_t hEntity) const
+	{
+		size_t hComp = indices.get(hEntity);
+		if (hComp != INVALID_HANDLE)
+		{
+			return get(hComp);
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+
+	DIntexTableT indices;
 
 	std::vector<FCreate> createFuncs;
 	std::vector<FDestroy> destroyFuncs;

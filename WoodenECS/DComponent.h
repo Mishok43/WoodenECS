@@ -23,7 +23,7 @@ using FDestructor = void(*)(void*);
 
 class DComponentStorage
 {
-protected:
+public:
 	DComponentStorage()
 	{
 	}
@@ -37,7 +37,6 @@ protected:
 		compData.init(objSize, 0, objSize);
 	}
 
-public:
 	void clear()
 	{
 		for (size_t i = 0; i < compData.getNumUsedBlks(); ++i)
@@ -167,7 +166,6 @@ public:
 	inline reference operator[](int hComp){ return *(get<T>(hComp));}
 	inline const_reference operator[](int hComp) const { return *(get<T>(hComp));}
 
-
 	inline iterator begin() {return (iterator)dataRaw(); }
 	inline const_iterator begin() const {return (const_iterator)dataRaw(); }
 
@@ -185,7 +183,7 @@ template<typename T>
 const HComponentStorage<T>* storage_cast(const DComponentStorage* storage)
 {
 	return (HComponentStorage<T>*)(storage);
-}
+}	
 
 
 WECS_END

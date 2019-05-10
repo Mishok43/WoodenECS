@@ -18,13 +18,17 @@ using namespace wecs;
 		int x;
 		int y;
 		bool flag;
-	};
+
+
+		COMPONENT_ECS_SETUP_INCLASS(TestComponent1, 8)
+	}; COMPONENT_ECS_SETUP_OUTCLASS(TestComponent1, 8);
 
 	struct TestComponent2
 	{
 		int x, y;
-	};
 
+		COMPONENT_ECS_SETUP_INCLASS(TestComponent2, 8)
+	}; COMPONENT_ECS_SETUP_OUTCLASS(TestComponent2, 8)
 
 	class TestSystem
 	{
@@ -50,11 +54,7 @@ namespace
 
 	TEST(ECS, SystemUpdateCMP)
 	{
-
-
 		WECS ecs;
-		ecs.registerComponent<TestComponent1>();
-		ecs.registerComponent<TestComponent2>();
 		for (size_t i = 0; i < 32; ++i)
 		{
 			bool flag = (bool)(i % 2 == 0);
@@ -94,7 +94,6 @@ namespace
 		};
 
 		WECS ecs;
-		ecs.registerComponent<TestComponent1>();
 
 		int sum = 0;
 		ecs.registerSystem<TestSystem2>(&sum);
@@ -130,7 +129,6 @@ namespace
 		};
 
 		WECS ecs;
-		ecs.registerComponent<TestComponent1>();
 
 		int sum = 0;
 		ecs.registerSystem<TestSystem2>(&sum);
@@ -156,7 +154,7 @@ namespace
 	TEST(ECS, AddingEdditingComponents)
 	{
 		WECS ecs;
-		ecs.registerComponent<TestComponent1>();	
+
 		for (size_t i = 0; i < 32; ++i)
 		{
 			ecs.addComponent<TestComponent1>(i, 10*i, 12*i);
@@ -185,7 +183,7 @@ namespace
 	TEST(ECS, RemoveComponents)
 	{
 		WECS ecs;
-		ecs.registerComponent<TestComponent1>();
+
 		for (size_t i = 0; i < 32; ++i)
 		{
 			ecs.addComponent<TestComponent1>(i, 10 * i, 12 * i);
@@ -202,7 +200,7 @@ namespace
 	TEST(ECS, RemoveComponentsIf)
 	{
 		WECS ecs;
-		ecs.registerComponent<TestComponent1>();
+
 		for (size_t i = 0; i < 32; ++i)
 		{
 			ecs.addComponent<TestComponent1>(i, 10 * i, 12 * i, (bool)(i % 2 == 0));
@@ -228,8 +226,7 @@ namespace
 	TEST(ECS, ForEach)
 	{
 		WECS ecs;
-		ecs.registerComponent<TestComponent1>();
-		ecs.registerComponent<TestComponent2>();
+		
 		for (size_t i = 0; i < 32; ++i)
 		{
 			bool flag = (bool)(i % 2 == 0);
@@ -255,13 +252,10 @@ namespace
 	TEST(ECS, HandleManager)
 	{
 		WECS ecs;
-		ecs.registerComponent<TestComponent1>();
-		ecs.registerComponent<TestComponent2>();
-
+		
 		size_t hEntity = ecs.createEntity();
 		ecs.addComponent<TestComponent1>(hEntity);
 		ecs.addComponent<TestComponent2>(hEntity);
-
 
 		ecs.removeEntity<TestComponent1, TestComponent2>(hEntity);
 
@@ -269,11 +263,56 @@ namespace
 		ASSERT_EQ(hEntity, hEntity2);
 	}
 
+	/*enum class Message : uint16_t
+	{
+		ACTION0,
+		ACTION1
+	};
+
+	struct MessageAction0
+	{
+		static const uint16_t id = uint16_t(Message::ACTION0);
+	};
+
+	struct MessageAction1
+	{
+		static const uint16_t id = uint16_t(Message::ACTION1);
+	};
+
+	TEST(ECS, Message)
+	{
+
+		class TestSystem2
+		{
+			using cmp_type_list = typename type_list<TestComponent1>;
+
+
+			void on(MessageAction0& message)
+			{
+
+			}
+
+			void on(MessageAction1& message)
+			{
+
+			}
+		};
+
+
+		WECS ecs;
+		ecs.registerComponent<TestComponent1>();
+		ecs.registerSystem<TestSystem2>();
+
+
+		ecs.dispa
+	}*/
+
 
 	TEST(ECS, Init2)
 	{
 		WECS ecs;
-		ecs.registerComponent<TestComponent1>();
+		
+
 	}
 }
 

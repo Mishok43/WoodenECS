@@ -1,3 +1,5 @@
+#pragma once 
+
 #include "stdafx.h"
 #include "DComponent.h"
 #include "DIndexTable.h"
@@ -5,6 +7,14 @@
 #include "MHandleManager.h"
 #include "ECSTypeTraits.h"
 #include "SSEHashMap/phmap.h"
+
+#define COMPONENT_ECS_SETUP_INCLASS(ComponentT, defNumObjects) private:\
+static WComponents<ComponentT, defNumObjects> ecsData; \
+friend class wecs::WECS;
+
+#define COMPONENT_ECS_SETUP_OUTCLASS(ComponentT, defNumObjects)\
+WComponents<ComponentT, defNumObjects> ComponentT::ecsData;
+
 
 using FUpdate = std::function<void(float)>;
 
@@ -14,20 +24,6 @@ class WECS
 {
 public:
 	using this_type = typename WECS;
-
-	template<typename ComponentT, typename IndexTable = DIndexTableFlat>
-	void registerComponent()
-	{
-		WComponents* comp = new WComponents;
-		comp->storage = new HComponentStorage<ComponentT>();
-		comp->storage->reserve(8);
-
-		comp->indices = new IndexTable(comp->storage);
-		comp->indices->init();
-		
-		components.push_back(comp);
-		componentsMap[&typeid(ComponentT)] = comp;
-	}
 
 	template<typename System, typename... Args>
 	void registerSystem(Args&&... args)
@@ -58,16 +54,13 @@ public:
 
 	template<typename F, typename HeadComponentT, typename... LeftComponentTs>
 	void for_each(F&& func, type_list<HeadComponentT, LeftComponentTs...>&&)
-	{
-		WComponents* headCompsWrapper = getComponentsWrapper<HeadComponentT>();
-		HComponentStorage<HeadComponentT>* headCompsStorage = storage_cast<HeadComponentT>(headCompsWrapper->storage);
-		
-		WGatherComponents<0, LeftComponentTs...> gather(*this);
+	{		
+		WGatherComponents<0, LeftComponentTs...> gather;
 
-		for (size_t hComp = 0; hComp < headCompsStorage->size(); ++hComp)
+		for (size_t hComp = 0; hComp < HeadComponentT::ecsData.size(); ++hComp)
 		{
-			HeadComponentT& headComp = (*headCompsStorage)[hComp];
-			size_t hEntity = headCompsStorage->getEntityHandle(hComp);
+			HeadComponentT& headComp = HeadComponentT::ecsData[hComp];
+			size_t hEntity = HeadComponentT::ecsData.getEntityHandle(hComp);
 			if (gather.setupCmpsDataForEntity(hEntity))
 			{
 				func(headComp, gather.getComp<LeftComponentTs>()...);
@@ -83,41 +76,28 @@ public:
 		}
 	}
 
-	template<typename ComponentT>
-	HComponentStorage<ComponentT>* getComponentStorage()
-	{
-		WComponents* compWrapper = getComponentsWrapper<ComponentT>();
-		assert(compWrapper);
-
-		return storage_cast<ComponentT>(compWrapper->storage);
-	}
-
 	inline size_t createEntity()
 	{
 		return handleManager.allocate();
 	}
 
-	template<typename... T>
-	inline void w(T... arg){ }
 
 	template<typename... ComponentTs>
 	inline void removeEntity(size_t hEntity)
 	{
-		w(removeComponentVariadic<ComponentTs>(hEntity)...);
-
+		int unused[] = { (removeComponent<ComponentTs>(hEntity), 0)... };
 		handleManager.deallocate(hEntity);
 	}
 
 	template<typename Component, typename... Args>
 	Component& addComponent(size_t hEntity, Args&&... args)
 	{
-		WComponents* compWrapper = getComponentsWrapper<Component>();
-		compWrapper->indices->insert(hEntity);
-		Component& c = compWrapper->storage->append<Component, Args...>(hEntity, std::forward<Args>(args)...);
+		Component::ecsData.indices.insert(hEntity);
+		Component& c = Component::ecsData.append<Component, Args...>(hEntity, std::forward<Args>(args)...);
 
-		for (size_t i = 0; i < compWrapper->createFuncs.size(); ++i)
+		for (size_t i = 0; i < Component::ecsData.createFuncs.size(); ++i)
 		{
-			compWrapper->createFuncs[i](hEntity, &c);
+			Component::ecsData.createFuncs[i](hEntity, &c);
 		}
 
 		return c;
@@ -126,33 +106,27 @@ public:
 	template<typename Component>
 	Component& getComponent(size_t hEntity)
 	{
-		WComponents* compWrapper = getComponentsWrapper<Component>();
-		size_t hComp = compWrapper->indices->get(hEntity);
+		size_t hComp = Component::ecsData.indices.get(hEntity);
 		assert(hComp != INVALID_HANDLE);
 
-		HComponentStorage<Component>* compStorage = storage_cast<Component>(compWrapper->storage);
-		return (*compStorage)[hComp];
+		return Component::ecsData[hComp];
 	}
 
 	template<typename Component>
 	size_t getNumbrComponents()
 	{
-		WComponents* compWrapper = getComponentsWrapper<Component>();
-		return compWrapper->storage->size();
+		return Component::ecsData.size();
 	}
 
 	template<typename Component, typename F>
 	void removeComponentsIf(F&& f)
 	{
-		WComponents* compWrapper = getComponentsWrapper<Component>();
-		HComponentStorage<Component>* compStorage = storage_cast<Component>(compWrapper->storage);
-
 		size_t hComp = 0;
-		while(hComp < compStorage->size())
+		while(hComp < Component::ecsData.size())
 		{
-			if (f((*compStorage)[hComp]))
+			if (f(Component::ecsData[hComp]))
 			{
-				removeComponent(hComp, compWrapper);
+				removeComponentByIndex<Component>(hComp);
 			}
 			else
 			{
@@ -160,40 +134,25 @@ public:
 			}
 		}
 	}
-	
-	template<typename Component>
-	int removeComponentVariadic(size_t hEntity)
-	{
-		WComponents* compWrapper = getComponentsWrapper<Component>();
-		removeComponent(compWrapper->indices->get(hEntity), compWrapper);
-		return 0;
-	}
 
-	template<typename Component>
+	template<typename ComponentT>
 	void removeComponent(size_t hEntity)
 	{
-		WComponents* compWrapper = getComponentsWrapper<Component>();
-		removeComponent(compWrapper->indices->get(hEntity), compWrapper);
+		removeComponentByIndex<ComponentT>(ComponentT::ecsData.indices.get(hEntity));
 	}
 
-	template<typename Component>
+	template<typename ComponentT>
 	void removeComponentByIndex(size_t hComp)
 	{
-		WComponents* compWrapper = getComponentsWrapper<Component>();
-		removeComponent(hComp, compWrapper);
-	}
-
-	void removeComponent(size_t hComp, WComponents* compWrapper)
-	{
-		void* comp = compWrapper->storage->getRaw(hComp);
+		void* comp = ComponentT::ecsData.getRaw(hComp);
 		assert(comp);
 
-		for (size_t i = 0; i < compWrapper->destroyFuncs.size(); ++i)
+		for (size_t i = 0; i < ComponentT::ecsData.destroyFuncs.size(); ++i)
 		{
-			compWrapper->destroyFuncs[i](comp);
+			ComponentT::ecsData.destroyFuncs[i](comp);
 		}
 
-		compWrapper->indices->removeByIndex(hComp);
+		ComponentT::ecsData.indices.removeByIndex(hComp);
 	}
 
 protected:
@@ -201,27 +160,13 @@ protected:
 	struct WGatherComponents
 	{
 		static constexpr int SIZE = sizeof...(ComponentsT);
-		WComponents* cmpsWraps[SIZE];
-		void* cmpsData[SIZE];
-
-		WGatherComponents(this_type& ecs)
-		{
-			fillCmpsWraps<0, ComponentsT...>(ecs);
-		}
-
-
+		std::array<void*, SIZE> cmpsData;
+		
 		bool setupCmpsDataForEntity(size_t hEntity)
 		{
-			for (uint8_t i = 0; i < SIZE; ++i)
-			{
-				cmpsData[i] = cmpsWraps[i]->getRaw(hEntity);
-				if (!cmpsData[i])
-				{
-					return false;
-				}
-			}
+			cmpsData = { getComponentData<ComponentsT>(hEntity)...};
 
-			return true;
+			return correctEntity;
 		}
 
 		template<typename CompT>
@@ -229,17 +174,30 @@ protected:
 		{
 			return getComp_<0, CompT, ComponentsT...>();
 		}
+
 	protected:
-		template<uint8_t CompIndex, typename CurComponentT, typename ...LeftComponentsT>
-		void fillCmpsWraps(this_type& ecs)
+		template<typename curCT>
+		inline void* getComponentData(size_t hEntity)
 		{
-			cmpsWraps[CompIndex] = ecs.getComponentsWrapper<CurComponentT>();
-			fillCmpsWraps<CompIndex + 1, LeftComponentsT...>(ecs);
+			if (!correctEntity)
+			{
+				return nullptr;
+			}
+
+			void* res = curCT::ecsData.getByEntityHandleRaw(hEntity);
+			if (!res)
+			{
+				correctEntity = false;
+			}
+
+			return res;
 		}
 
-		template<uint8_t CompIndex>
-		void fillCmpsWraps(this_type& ecs)
+		template<uint8_t iCur, uint8_t iNeed, typename curCT>
+		inline void* getComponentData(size_t hEntity)
 		{
+			static_assert(iCur == iNeed);
+			return curCT::ecsData.getByEntityHandleRaw(hEntity);
 		}
 
 		template<uint8_t Index, typename CompT, typename CurCompT, typename ...LeftComponentsT>
@@ -260,15 +218,12 @@ protected:
 			return *(CompT*)(cmpsData[Index]);
 		}
 
-
+		bool correctEntity=true;
 	};
 
 	template<int I>
 	struct WGatherComponents<I>
 	{
-		WGatherComponents(this_type& ecs)
-		{}
-
 		bool setupCmpsDataForEntity(size_t hEntity)
 		{
 			return true;
@@ -293,16 +248,14 @@ protected:
 	template<typename System, typename HeadComponentT, typename... LeftComponentsT>
 	void registerECSComponentUpdate(System* s, type_list<HeadComponentT, LeftComponentsT...>&&)
 	{
-		WComponents* headCompsWrapper = getComponentsWrapper<HeadComponentT>();
-		HComponentStorage<HeadComponentT>* headCompsStorage = storage_cast<HeadComponentT>(headCompsWrapper->storage);
-		registerUpdate([s, this, headCompsStorage](float dTime)
+		registerUpdate([s, this](float dTime)
 		{
-			WGatherComponents<0, LeftComponentsT...> gather(*this);
+			WGatherComponents<0, LeftComponentsT...> gather;
 
-			for (size_t hComp = 0; hComp < headCompsStorage->size(); ++hComp)
+			for (size_t hComp = 0; hComp < HeadComponentT::ecsData.size(); ++hComp)
 			{
-				HeadComponentT& headComp = (*headCompsStorage)[hComp];
-				size_t hEntity = headCompsStorage->getEntityHandle(hComp);
+				HeadComponentT& headComp = HeadComponentT::ecsData[hComp];
+				size_t hEntity = HeadComponentT::ecsData.getEntityHandle(hComp);
 				if (gather.setupCmpsDataForEntity(hEntity))
 				{
 					s->update(*this, headComp, gather.getComp<LeftComponentsT>()..., dTime);
@@ -314,16 +267,14 @@ protected:
 	template<typename System, typename HeadComponentT, typename... LeftComponentsT>
 	void registerComponentUpdate(System* s, type_list<HeadComponentT, LeftComponentsT...>&&)
 	{
-		WComponents* headCompsWrapper = getComponentsWrapper<HeadComponentT>();
-		HComponentStorage<HeadComponentT>* headCompsStorage = storage_cast<HeadComponentT>(headCompsWrapper->storage);
-		registerUpdate([s, this, headCompsStorage](float dTime)
+		registerUpdate([s, this](float dTime)
 		{
-			WGatherComponents<0, LeftComponentsT...> gather(*this);
+			WGatherComponents<0, LeftComponentsT...> gather;
 
-			for (size_t hComp = 0; hComp < headCompsStorage->size(); ++hComp)
+			for (size_t hComp = 0; hComp < HeadComponentT::ecsData.size(); ++hComp)
 			{
-				HeadComponentT& headComp = (*headCompsStorage)[hComp];
-				size_t hEntity = headCompsStorage->getEntityHandle(hComp);
+				HeadComponentT& headComp = HeadComponentT::ecsData[hComp];
+				size_t hEntity = HeadComponentT::ecsData.getEntityHandle(hComp);
 				if (gather.setupCmpsDataForEntity(hEntity))
 				{
 					s->update(headComp, gather.getComp<LeftComponentsT>()..., dTime);
@@ -332,47 +283,26 @@ protected:
 		});
 	}
 
-	template<typename System, typename Component>
+	template<typename System, typename ComponentT>
 	void registerDestroy(System* s)
 	{
-		
-		WComponents* components = componentsMap[&typeid(Component)];
-		assert(components);
-
-		components->destroyFuncs.emplace_back([s](void* data)
+		ComponentT::ecsData.destroyFuncs.emplace_back([s](void* data)
 		{
-			s->destroy(*((Component*)data));
+			s->destroy(*((ComponentT*)data));
 		});
 	}
 
-	template<typename System, typename Component>
+	template<typename System, typename ComponentT>
 	void registerCreate(System* s)
 	{
-		WComponents* components = componentsMap[&typeid(Component)];
-		assert(components);
-
-		components->createFuncs.emplace_back([s](size_t hEntity, void* data)
+		ComponentT::ecsData.createFuncs.emplace_back([s](size_t hEntity, void* data)
 		{
-			s->create(hEntity, *((Component*)data));
+			s->create(hEntity, *((ComponentT*)data));
 		});
 	}
 
-	template<typename Component>
-	inline const WComponents* getComponentsWrapper() const
-	{
-		return componentsMap[&typeid(Component)];
-	}
-
-	template<typename Component>
-	inline WComponents* getComponentsWrapper()
-	{
-		return componentsMap[&typeid(Component)];
-	}
-
-	std::vector<WComponents*> components;
 	std::vector<FUpdate> updateFuncs;
 	MHandleManager handleManager;
-	phmap::flat_hash_map<const std::type_info*, WComponents*> componentsMap;
 };
 
 WECS_END
