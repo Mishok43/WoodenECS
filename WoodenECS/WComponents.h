@@ -5,6 +5,21 @@
 
 WECS_BEGIN
 
+
+#define COMPONENT_DATA_INCLASS(ComponentT, defNumObjects) private:\
+static WComponents<ComponentT, defNumObjects> ecsData; \
+friend class wecs::WECS;
+
+#define COMPONENT_DATA_OUTCLASS(ComponentT, defNumObjects)\
+WComponents<ComponentT, defNumObjects> ComponentT::ecsData;
+
+#define COMPONENT_INDEXTABLEISHASH_DATA_INCLASS(ComponentT, defNumObjects) private:\
+static WComponents<ComponentT, defNumObjects, DIndexTableHash> ecsData; \
+friend class wecs::WECS;
+
+#define COMPONENT_INDEXTABLEISHASH_DATA_OUTCLASS(ComponentT, defNumObjects)\
+WComponents<ComponentT, defNumObjects, DIndexTableHash> ComponentT::ecsData;
+
 using FDestroy = std::function<void(void*)>;
 using FCreate = std::function<void(size_t, void*)>;
 

@@ -8,12 +8,6 @@
 #include "ECSTypeTraits.h"
 #include "SSEHashMap/phmap.h"
 
-#define COMPONENT_ECS_SETUP_INCLASS(ComponentT, defNumObjects) private:\
-static WComponents<ComponentT, defNumObjects> ecsData; \
-friend class wecs::WECS;
-
-#define COMPONENT_ECS_SETUP_OUTCLASS(ComponentT, defNumObjects)\
-WComponents<ComponentT, defNumObjects> ComponentT::ecsData;
 
 
 using FUpdate = std::function<void(float)>;

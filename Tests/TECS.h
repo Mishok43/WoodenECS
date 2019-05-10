@@ -20,15 +20,15 @@ using namespace wecs;
 		bool flag;
 
 
-		COMPONENT_ECS_SETUP_INCLASS(TestComponent1, 8)
-	}; COMPONENT_ECS_SETUP_OUTCLASS(TestComponent1, 8);
+		COMPONENT_DATA_INCLASS(TestComponent1, 8)
+	}; COMPONENT_DATA_OUTCLASS(TestComponent1, 8);
 
 	struct TestComponent2
 	{
 		int x, y;
 
-		COMPONENT_ECS_SETUP_INCLASS(TestComponent2, 8)
-	}; COMPONENT_ECS_SETUP_OUTCLASS(TestComponent2, 8)
+		COMPONENT_DATA_INCLASS(TestComponent2, 8)
+	}; COMPONENT_DATA_OUTCLASS(TestComponent2, 8)
 
 	class TestSystem
 	{
