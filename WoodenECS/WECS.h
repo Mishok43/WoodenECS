@@ -158,8 +158,8 @@ protected:
 		
 		bool setupCmpsDataForEntity(size_t hEntity)
 		{
+			correctEntity = true;
 			cmpsData = { getComponentData<ComponentsT>(hEntity)...};
-
 			return correctEntity;
 		}
 
@@ -212,7 +212,7 @@ protected:
 			return *(CompT*)(cmpsData[Index]);
 		}
 
-		bool correctEntity=true;
+		bool correctEntity;
 	};
 
 	template<int I>

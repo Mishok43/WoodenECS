@@ -6,20 +6,6 @@
 
 WECS_BEGIN
 
-//__declspec(novtable) class DIndexTable
-//{
-//public:
-//	virtual void init(DComponentStorage* compStorage) = 0;
-//	virtual size_t insert(size_t hEntity) = 0;
-//	virtual inline bool exists(size_t hEntity) const = 0;
-//	virtual inline size_t get(size_t hEntity) const = 0;
-//	virtual size_t remove(size_t hEntity) = 0;
-//	virtual size_t removeByIndex(size_t hComp) = 0;
-//	virtual inline void clear() = 0;
-//	virtual inline size_t size() const = 0;
-//};
-
-
 class DIndexTableFlat
 {
 public:
