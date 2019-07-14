@@ -1,33 +1,33 @@
 #pragma once
 
 #include "pch.h"
-#include "WoodenAllocators/AllocatorPoolGrowSwap.h"
+#include "WoodenAllocators/AllocatorPoolSwap.h"
 
 using namespace wal;
 
 namespace
 {
-	TEST(AllocatorPoolGrowSwap, Init)
+	TEST(AllocatorPoolSwap, Init)
 	{
 		struct A
 		{
 			int a, b;
 		};
 
-		wal::AllocatorPoolGrowSwap al;
+		wal::AllocatorPoolSwap al;
 		al.init(sizeof(A), 10, sizeof(A));
 
 		ASSERT_EQ(al.getSize(), 10 * sizeof(A));
 	}
 
-	TEST(AllocatorPoolGrowSwap, Add)
+	TEST(AllocatorPoolSwap, Add)
 	{
 		struct A
 		{
 			int a, b;
 		};
 
-		wal::AllocatorPoolGrowSwap al;
+		wal::AllocatorPoolSwap al;
 		al.init(sizeof(A), 10, sizeof(A));
 		A* a0 = (A*)al.allocMem();
 		A* a1 = al.get<A>(0);

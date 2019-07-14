@@ -3,6 +3,24 @@
 
 WECS_BEGIN
 
+template<typename CompT>
+struct CompPtrHandle
+{
+	CompT* ptr;
+	size_t hEntity;
+
+	operator bool() const
+	{
+		return ptr != nullptr;
+	}
+};
+
+template<typename CompT>
+struct HComp
+{
+	size_t hComp;
+};
+
 template<typename... T>
 struct type_list {};
 

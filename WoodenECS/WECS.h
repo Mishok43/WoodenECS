@@ -25,7 +25,7 @@ public:
 		using system_cmp_type_list = typename System::cmp_type_list;
 		System* system = new System(std::forward<Args>(args)...);
 
-		if constexpr(has_ecs_cmp_update<System, WECS, system_cmp_type_list, float>)
+		if constexpr (has_ecs_cmp_update<System, WECS, system_cmp_type_list, float>)
 		{
 			registerECSComponentUpdate(system, system_cmp_type_list());
 		}
@@ -38,7 +38,7 @@ public:
 		if constexpr (has_create<System, size_t, type_list_head<system_cmp_type_list>>)
 		{
 			registerCreate<System, type_list_head<system_cmp_type_list>>(system);
-		}	
+		}
 
 		if constexpr (has_destroy<System, type_list_head<system_cmp_type_list>>)
 		{
@@ -48,7 +48,7 @@ public:
 
 	template<typename F, typename HeadComponentT, typename... LeftComponentTs>
 	void for_each(F&& func, type_list<HeadComponentT, LeftComponentTs...>&&)
-	{		
+	{
 		WGatherComponents<0, LeftComponentTs...> gather;
 
 		for (size_t hComp = 0; hComp < HeadComponentT::ecsData.size(); ++hComp)
@@ -69,6 +69,7 @@ public:
 			updateFuncs[i](dtime);
 		}
 	}
+
 
 	inline size_t createEntity()
 	{

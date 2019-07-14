@@ -6,25 +6,42 @@
 WECS_BEGIN
 
 
-#define COMPONENT_DATA_INCLASS(ComponentT, defNumObjects) private:\
-static WComponents<ComponentT, defNumObjects> ecsData; \
-friend class wecs::WECS;
+#define DECL_FLAT_COMP_DATA(ComponentT, defNumObjects) private:\
+static WComponents<ComponentT, defNumObjects, DIndexTableFlat> ecsData; \
+friend class wecs::WECS;\
+public:\
+using WComponentsT = typename WComponents<ComponentT, defNumObjects, DIndexTableFlat>;
 
-#define COMPONENT_DATA_OUTCLASS(ComponentT, defNumObjects)\
-WComponents<ComponentT, defNumObjects> ComponentT::ecsData;
-
-#define COMPONENT_INDEXTABLEISHASH_DATA_INCLASS(ComponentT, defNumObjects) private:\
+#define DECL_DENSE_COMP_DATA(ComponentT, defNumObjects) private:\
 static WComponents<ComponentT, defNumObjects, DIndexTableHash> ecsData; \
-friend class wecs::WECS;
+friend class wecs::WECS;\
+public:\
+using WComponentsT = typename WComponents<ComponentT, defNumObjects, DIndexTableHash>;
 
-#define COMPONENT_INDEXTABLEISHASH_DATA_OUTCLASS(ComponentT, defNumObjects)\
-WComponents<ComponentT, defNumObjects, DIndexTableHash> ComponentT::ecsData;
+#define DECL_UNMANAGED_FLAT_COMP_DATA(ComponentT, defNumObjects) private:\
+static WComponents<ComponentT, defNumObjects, DIndexTableFlat> ecsData; \
+friend class wecs::WECS;\
+public:\
+using WComponentsT = typename WComponents<ComponentT, defNumObjects, DIndexTableFlat, DComponentStorageSafe>;
+
+#define DECL_UNMANAGED_DENSE_COMP_DATA(ComponentT, defNumObjects) private:\
+static WComponents<ComponentT, defNumObjects, DIndexTableHash> ecsData; \
+friend class wecs::WECS;\
+public:\
+using WComponentsT = typename WComponents<ComponentT, defNumObjects, DIndexTableHash, DComponentStorageSafe>;
+
+#define DECL_OUT_COMP_DATA(ComponentT)\
+ComponentT::WComponentsT ComponentT::ecsData;
+
+
+
+
 
 using FDestroy = std::function<void(void*)>;
 using FCreate = std::function<void(size_t, void*)>;
 
-template<typename ComponentT, uint16_t defNumObjects, typename DIntexTableT = DIndexTableFlat>
-class WComponents: public HComponentStorage<ComponentT>
+template<typename ComponentT, uint16_t defNumObjects, typename DIntexTableT = DIndexTableFlat, typename CompStorageT = DComponentStorage>
+class WComponents: public HComponentStorage<ComponentT, CompStorageT>
 {
 public:
 	WComponents()
