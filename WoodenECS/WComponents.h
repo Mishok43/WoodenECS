@@ -6,35 +6,36 @@
 WECS_BEGIN
 
 
-#define DECL_FLAT_COMP_DATA(ComponentT, defNumObjects) private:\
-static WComponents<ComponentT, defNumObjects, DIndexTableFlat> ecsData; \
-friend class wecs::WECS;\
+#define DECL_MANAGED_FLAT_COMP_DATA(ComponentT, defNumObjects) \
 public:\
-using WComponentsT = typename WComponents<ComponentT, defNumObjects, DIndexTableFlat>;
+using CompStorageT = typename WComponents<ComponentT, defNumObjects, DIndexTableFlat>; \
+private:\
+static CompStorageT ecsData; \
+friend class wecs::WECS;\
 
-#define DECL_DENSE_COMP_DATA(ComponentT, defNumObjects) private:\
-static WComponents<ComponentT, defNumObjects, DIndexTableHash> ecsData; \
-friend class wecs::WECS;\
+#define DECL_MANAGED_DENSE_COMP_DATA(ComponentT, defNumObjects) \
 public:\
-using WComponentsT = typename WComponents<ComponentT, defNumObjects, DIndexTableHash>;
+using CompStorageT = typename WComponents<ComponentT, defNumObjects, DIndexTableHash>; \
+private:\
+static CompStorageT ecsData; \
+friend class wecs::WECS;
 
-#define DECL_UNMANAGED_FLAT_COMP_DATA(ComponentT, defNumObjects) private:\
-static WComponents<ComponentT, defNumObjects, DIndexTableFlat> ecsData; \
-friend class wecs::WECS;\
+#define DECL_UNMANAGED_FLAT_COMP_DATA(ComponentT, defNumObjects) \
 public:\
-using WComponentsT = typename WComponents<ComponentT, defNumObjects, DIndexTableFlat, DComponentStorageSafe>;
+using CompStorageT = typename WComponents<ComponentT, defNumObjects, DIndexTableFlat, DComponentStorageUnmanaged>;\
+private:\
+static CompStorageT ecsData; \
+friend class wecs::WECS;
 
-#define DECL_UNMANAGED_DENSE_COMP_DATA(ComponentT, defNumObjects) private:\
-static WComponents<ComponentT, defNumObjects, DIndexTableHash> ecsData; \
-friend class wecs::WECS;\
+#define DECL_UNMANAGED_DENSE_COMP_DATA(ComponentT, defNumObjects)\
 public:\
-using WComponentsT = typename WComponents<ComponentT, defNumObjects, DIndexTableHash, DComponentStorageSafe>;
+using CompStorageT = typename WComponents<ComponentT, defNumObjects, DIndexTableHash, DComponentStorageUnmanaged>;\
+private:\
+static CompStorageT ecsData; \
+friend class wecs::WECS;
 
 #define DECL_OUT_COMP_DATA(ComponentT)\
-ComponentT::WComponentsT ComponentT::ecsData;
-
-
-
+ComponentT::CompStorageT ComponentT::ecsData;
 
 
 using FDestroy = std::function<void(void*)>;

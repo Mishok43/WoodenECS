@@ -14,6 +14,14 @@ using FUpdate = std::function<void(float)>;
 
 WECS_BEGIN
 
+
+template<typename CompT>
+struct HComp
+{
+	size_t pos;
+};
+
+
 class WECS
 {
 public:
@@ -105,6 +113,12 @@ public:
 		assert(hComp != INVALID_HANDLE);
 
 		return Component::ecsData[hComp];
+	}
+
+	template<typename ComponentT>
+	ComponentT& getComponent(const HComp<ComponentT>& hComp)
+	{
+		return ComponentT::ecsData[hComp.pos];
 	}
 
 	template<typename Component>

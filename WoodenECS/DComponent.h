@@ -146,10 +146,10 @@ protected:
 };
 
 
-class DComponentStorageSafe
+class DComponentStorageUnmanaged
 {
 public:
-	DComponentStorageSafe()
+	DComponentStorageUnmanaged()
 	{
 	}
 

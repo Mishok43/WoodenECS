@@ -15,11 +15,7 @@ struct CompPtrHandle
 	}
 };
 
-template<typename CompT>
-struct HComp
-{
-	size_t hComp;
-};
+
 
 template<typename... T>
 struct type_list {};
