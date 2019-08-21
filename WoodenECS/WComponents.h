@@ -6,9 +6,11 @@
 WECS_BEGIN
 
 
+
 #define DECL_MANAGED_FLAT_COMP_DATA(ComponentT, defNumObjects) \
 public:\
 using CompStorageT = typename WComponents<ComponentT, defNumObjects, DIndexTableFlat>; \
+static constexpr bool IsManaged = true; \ 
 private:\
 static CompStorageT ecsData; \
 friend class wecs::WECS;\
@@ -16,6 +18,7 @@ friend class wecs::WECS;\
 #define DECL_MANAGED_DENSE_COMP_DATA(ComponentT, defNumObjects) \
 public:\
 using CompStorageT = typename WComponents<ComponentT, defNumObjects, DIndexTableHash>; \
+static constexpr bool IsManaged = true; \
 private:\
 static CompStorageT ecsData; \
 friend class wecs::WECS;
@@ -23,6 +26,7 @@ friend class wecs::WECS;
 #define DECL_UNMANAGED_FLAT_COMP_DATA(ComponentT, defNumObjects) \
 public:\
 using CompStorageT = typename WComponents<ComponentT, defNumObjects, DIndexTableFlat, DComponentStorageUnmanaged>;\
+static constexpr bool IsManaged = false; \
 private:\
 static CompStorageT ecsData; \
 friend class wecs::WECS;
@@ -30,6 +34,7 @@ friend class wecs::WECS;
 #define DECL_UNMANAGED_DENSE_COMP_DATA(ComponentT, defNumObjects)\
 public:\
 using CompStorageT = typename WComponents<ComponentT, defNumObjects, DIndexTableHash, DComponentStorageUnmanaged>;\
+static constexpr bool IsManaged = false; \
 private:\
 static CompStorageT ecsData; \
 friend class wecs::WECS;

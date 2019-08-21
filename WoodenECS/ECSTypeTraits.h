@@ -50,6 +50,25 @@ using type_list_size = typename type_list_size_s<List>::type;
 template<typename List>
 using type_list_head = typename type_list_head_s<List>::type;
 
+
+template<uint8_t Index, typename CompT, typename CurCompT, typename ...LeftComponentsT>
+CompT& getComp_()
+{
+	return getComp_<Index, CompT, CurCompT, LeftComponentsT...>(std::is_same<CompT, CurCompT>());
+}
+
+template<uint8_t Index, typename CompT, typename CurCompT, typename NextCompT, typename ...LeftComponentsT>
+CompT& getComp_(std::false_type&&)
+{
+	return getComp_<Index + 1, CompT, NextCompT, LeftComponentsT...>(std::is_same<CompT, NextCompT>());
+}
+
+template<uint8_t Index, typename CompT, typename CurCompT, typename ...LeftComponentsT>
+CompT& getComp_(std::true_type&&)
+{
+	return *(CompT*)(cmpsData[Index]);
+}
+
 template<typename S, typename... Args>
 constexpr decltype(std::declval<S>().update(std::declval<Args>()...), true) has_update_f(int) {return true;}
 

@@ -81,7 +81,7 @@ public:
 	{
 		if (hEntity >= indices.size())
 			return false;
-
+./
 		return indices[hEntity] != INVALID_HANDLE;
 	}
 	
@@ -118,7 +118,7 @@ public:
 	void init(DComponentStorage* _compStorage) 
 	{
 		compStorage = _compStorage;
-	}
+	} 
 
 	size_t insert(size_t hEntity) 
 	{
