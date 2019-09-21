@@ -18,21 +18,15 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TAllocatorFreeListGrowSwap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TECS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TAllocatorFreeListTree.h">
-      <Filter>Header Files</Filter>
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Tests.cpp">
+    <ClCompile Include="Test2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

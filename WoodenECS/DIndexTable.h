@@ -6,10 +6,11 @@
 
 WECS_BEGIN
 
+
 class DIndexTableFlat
 {
 public:
-	void init(DComponentStorage* _compStorage) 
+	void init(DComponentStorage* _compStorage)
 	{
 		indices.resize(8, INVALID_HANDLE);
 		compStorage = _compStorage;
@@ -19,13 +20,22 @@ public:
 	{
 		assert(!exists(hEntity));
 
+		bool b = !exists(hEntity);
+
 		size_t index = compStorage->size();
 		if (hEntity >= indices.size())
 		{
 			size_t newSize = indices.size();
-			while (newSize <= hEntity)
+			if (newSize == 0)
 			{
-				newSize *= 2;
+				newSize = 2;
+			}
+			else
+			{
+				while (newSize <= hEntity)
+				{
+					newSize *= 2;
+				}
 			}
 			indices.resize(newSize, INVALID_HANDLE);
 		}
@@ -81,7 +91,7 @@ public:
 	{
 		if (hEntity >= indices.size())
 			return false;
-./
+
 		return indices[hEntity] != INVALID_HANDLE;
 	}
 	
@@ -92,6 +102,7 @@ public:
 
 		return indices[hEntity];
 	}
+
 
 	inline void clear() 
 	{
@@ -106,16 +117,15 @@ public:
 
 protected:
 	std::vector<size_t> indices;
-	DComponentStorage* compStorage = nullptr;	
+	DComponentStorage* compStorage = nullptr;
 };
-
 
 
 class DIndexTableHash 
 {
 public:
 
-	void init(DComponentStorage* _compStorage) 
+	void init(DComponentStorage* _compStorage)
 	{
 		compStorage = _compStorage;
 	} 

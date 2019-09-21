@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
+#include "Handlers.h"
 #include <vector>
 
 WECS_BEGIN
@@ -13,11 +14,11 @@ public:
 		reset();
 	}
 
-	inline size_t allocate()
+	inline HEntity allocate()
 	{
 		if (!freeHandles.empty())
 		{
-			size_t handle = freeHandles[0];
+			HEntity handle = freeHandles[0];
 			size_t numFreeHandles = freeHandles.size();
 			freeHandles[0] = freeHandles[numFreeHandles-1];
 			freeHandles.resize(numFreeHandles - 1);
@@ -27,7 +28,7 @@ public:
 		return numAllocatedHandles++;
 	}
 
-	inline void deallocate(size_t handle)
+	inline void deallocate(HEntity handle)
 	{
 #ifdef _DEBUG
 		assert(handle < numAllocatedHandles);
@@ -44,7 +45,7 @@ public:
 
 protected:
 	size_t numAllocatedHandles = 0;
-	std::vector<size_t> freeHandles;
+	std::vector<HEntity> freeHandles;
 };
 
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "stdafx.h"
-
+#include "Handlers.h"
 WECS_BEGIN
 
 template<typename CompT>
@@ -50,24 +50,24 @@ using type_list_size = typename type_list_size_s<List>::type;
 template<typename List>
 using type_list_head = typename type_list_head_s<List>::type;
 
-
-template<uint8_t Index, typename CompT, typename CurCompT, typename ...LeftComponentsT>
-CompT& getComp_()
-{
-	return getComp_<Index, CompT, CurCompT, LeftComponentsT...>(std::is_same<CompT, CurCompT>());
-}
-
-template<uint8_t Index, typename CompT, typename CurCompT, typename NextCompT, typename ...LeftComponentsT>
-CompT& getComp_(std::false_type&&)
-{
-	return getComp_<Index + 1, CompT, NextCompT, LeftComponentsT...>(std::is_same<CompT, NextCompT>());
-}
-
-template<uint8_t Index, typename CompT, typename CurCompT, typename ...LeftComponentsT>
-CompT& getComp_(std::true_type&&)
-{
-	return *(CompT*)(cmpsData[Index]);
-}
+//
+//template<uint8_t Index, typename CompT, typename CurCompT, typename ...LeftComponentsT>
+//CompT& getComp_()
+//{
+//	return getComp_<Index, CompT, CurCompT, LeftComponentsT...>(std::is_same<CompT, CurCompT>());
+//}
+//
+//template<uint8_t Index, typename CompT, typename CurCompT, typename NextCompT, typename ...LeftComponentsT>
+//CompT& getComp_(std::false_type&&)
+//{
+//	return getComp_<Index + 1, CompT, NextCompT, LeftComponentsT...>(std::is_same<CompT, NextCompT>());
+//}
+//
+//template<uint8_t Index, typename CompT, typename CurCompT, typename ...LeftComponentsT>
+//CompT& getComp_(std::true_type&&)
+//{
+//	return *(CompT*)(cmpsData[Index]);
+//}
 
 template<typename S, typename... Args>
 constexpr decltype(std::declval<S>().update(std::declval<Args>()...), true) has_update_f(int) {return true;}
@@ -99,6 +99,20 @@ struct has_cmp_update_s<ST, TimeT, type_list<ComponentTs...>>
 template<typename ST, typename TypeListT, typename TimeT>
 constexpr bool has_cmp_update = has_cmp_update_s<ST, TimeT, TypeListT>::value;
 
+
+void hEntityTest(HEntity hEntity)
+{
+}
+
+
+template<typename T>
+constexpr decltype(hEntityTest(std::declval<T>().hEntity), true) has_hentity_inside_comp_f(int) {return true;}
+
+template<typename T>
+constexpr bool has_hentity_inside_comp_f(...) {return false;}
+
+template<typename T>
+constexpr bool has_hentity_inside_comp_v = has_hentity_inside_comp_f<T>(1);
 
 template<typename S, typename... Args>
 constexpr decltype(std::declval<S>().create(std::declval<Args>()...), true) has_create_f(int){ return true;}

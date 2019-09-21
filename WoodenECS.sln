@@ -4,14 +4,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WoodenECS", "WoodenECS\WoodenECS.vcxproj", "{B3596647-5DB7-46DC-9D39-801B0F6A66EB}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tests", "Tests\Tests.vcxproj", "{59D6F483-F096-46D9-AD67-A5EE295CD7C8}"
 	ProjectSection(ProjectDependencies) = postProject
-		{B3596647-5DB7-46DC-9D39-801B0F6A66EB} = {B3596647-5DB7-46DC-9D39-801B0F6A66EB}
 		{86DDAD96-BAC0-40BF-A401-8D5443C58056} = {86DDAD96-BAC0-40BF-A401-8D5443C58056}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WoodenAllocators", "..\WoodenAllocators\WoodenAllocators.vcxproj", "{86DDAD96-BAC0-40BF-A401-8D5443C58056}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WoodenAllocators", "..\WoodenAllocators\WoodenAllocators\WoodenAllocators.vcxproj", "{86DDAD96-BAC0-40BF-A401-8D5443C58056}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test2", "Test2\Test2.vcxproj", "{5FF7B248-283A-4C95-9EF7-99FF30DBF722}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,14 +28,6 @@ Global
 		{B3596647-5DB7-46DC-9D39-801B0F6A66EB}.Release|x64.Build.0 = Release|x64
 		{B3596647-5DB7-46DC-9D39-801B0F6A66EB}.Release|x86.ActiveCfg = Release|Win32
 		{B3596647-5DB7-46DC-9D39-801B0F6A66EB}.Release|x86.Build.0 = Release|Win32
-		{59D6F483-F096-46D9-AD67-A5EE295CD7C8}.Debug|x64.ActiveCfg = Debug|x64
-		{59D6F483-F096-46D9-AD67-A5EE295CD7C8}.Debug|x64.Build.0 = Debug|x64
-		{59D6F483-F096-46D9-AD67-A5EE295CD7C8}.Debug|x86.ActiveCfg = Debug|Win32
-		{59D6F483-F096-46D9-AD67-A5EE295CD7C8}.Debug|x86.Build.0 = Debug|Win32
-		{59D6F483-F096-46D9-AD67-A5EE295CD7C8}.Release|x64.ActiveCfg = Release|x64
-		{59D6F483-F096-46D9-AD67-A5EE295CD7C8}.Release|x64.Build.0 = Release|x64
-		{59D6F483-F096-46D9-AD67-A5EE295CD7C8}.Release|x86.ActiveCfg = Release|Win32
-		{59D6F483-F096-46D9-AD67-A5EE295CD7C8}.Release|x86.Build.0 = Release|Win32
 		{86DDAD96-BAC0-40BF-A401-8D5443C58056}.Debug|x64.ActiveCfg = Debug|x64
 		{86DDAD96-BAC0-40BF-A401-8D5443C58056}.Debug|x64.Build.0 = Debug|x64
 		{86DDAD96-BAC0-40BF-A401-8D5443C58056}.Debug|x86.ActiveCfg = Debug|Win32
@@ -45,6 +36,14 @@ Global
 		{86DDAD96-BAC0-40BF-A401-8D5443C58056}.Release|x64.Build.0 = Release|x64
 		{86DDAD96-BAC0-40BF-A401-8D5443C58056}.Release|x86.ActiveCfg = Release|Win32
 		{86DDAD96-BAC0-40BF-A401-8D5443C58056}.Release|x86.Build.0 = Release|Win32
+		{5FF7B248-283A-4C95-9EF7-99FF30DBF722}.Debug|x64.ActiveCfg = Debug|x64
+		{5FF7B248-283A-4C95-9EF7-99FF30DBF722}.Debug|x64.Build.0 = Debug|x64
+		{5FF7B248-283A-4C95-9EF7-99FF30DBF722}.Debug|x86.ActiveCfg = Debug|Win32
+		{5FF7B248-283A-4C95-9EF7-99FF30DBF722}.Debug|x86.Build.0 = Debug|Win32
+		{5FF7B248-283A-4C95-9EF7-99FF30DBF722}.Release|x64.ActiveCfg = Release|x64
+		{5FF7B248-283A-4C95-9EF7-99FF30DBF722}.Release|x64.Build.0 = Release|x64
+		{5FF7B248-283A-4C95-9EF7-99FF30DBF722}.Release|x86.ActiveCfg = Release|Win32
+		{5FF7B248-283A-4C95-9EF7-99FF30DBF722}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
