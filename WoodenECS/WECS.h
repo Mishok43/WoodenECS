@@ -107,6 +107,11 @@ public:
 		handleManager.deallocate(hEntity);
 	}
 
+	inline void removeEntity(HEntity hEntity)
+	{
+		handleManager.deallocate(hEntity);
+	}
+
 	template<typename Component, typename... Args>
 	Component& addComponent(HEntity hEntity, Args&&... args)
 	{
@@ -192,6 +197,17 @@ public:
 
 
 	template<typename ComponentT>
+	void debugValidateIndexTable()
+	{
+		for (uint32_t i = 0; i < ComponentT::ecsData.size(); i++)
+		{
+			HEntity hEntity =  ComponentT::ecsData.getEntityHandle(i);
+			size_t hComp = ComponentT::ecsData.indices.get(hEntity);
+			assert(i == hComp);
+		}
+	}
+
+	template<typename ComponentT>
 	void removeComponentByIndex(size_t hComp)
 	{
 		void* comp = ComponentT::ecsData.getRaw(hComp);
@@ -215,7 +231,7 @@ public:
 	template<typename ComponentT>
 	void deleteEntitiesOfComponents()
 	{
-		for (uint16_t i = 0; i < ComponentT::ecsData.size(); i++)
+		for (uint32_t i = 0; i < ComponentT::ecsData.size(); i++)
 		{
 			HEntity hEntity = ComponentT::ecsData.getEntityHandle(i);
 			removeEntity(hEntity);

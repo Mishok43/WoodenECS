@@ -2,50 +2,38 @@
 
 #include "stdafx.h"
 #include "Handlers.h"
+#include "WoodenAllocators/AllocatorPoolFreeList.h"
 #include <vector>
 
 WECS_BEGIN
 
-class MHandleManager
+class MHandleManager: public wal::AllocatorPoolFreeList
 {
 public:
 	MHandleManager()
 	{
-		reset();
+		init(sizeof(HEntity), 2048, alignof(HEntity));
 	}
 
 	inline HEntity allocate()
 	{
-		if (!freeHandles.empty())
-		{
-			HEntity handle = freeHandles[0];
-			size_t numFreeHandles = freeHandles.size();
-			freeHandles[0] = freeHandles[numFreeHandles-1];
-			freeHandles.resize(numFreeHandles - 1);
-
-			return handle;
-		}
-		return numAllocatedHandles++;
+		HEntity* hEntity = (HEntity*)(allocMem(1)); 
+		hEntity->h = getPos(hEntity);
+		return *hEntity;
 	}
 
 	inline void deallocate(HEntity handle)
 	{
-#ifdef _DEBUG
-		assert(handle < numAllocatedHandles);
-#endif
-
-		freeHandles.push_back(handle);
+		freeMem(get<HEntity>(handle.h));
 	}
 
 	inline void reset()
 	{
-		numAllocatedHandles = 0;
-		freeHandles.clear();
+		AllocatorPoolFreeList::reset();
 	}
 
 protected:
-	size_t numAllocatedHandles = 0;
-	std::vector<HEntity> freeHandles;
+
 };
 
 

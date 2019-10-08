@@ -4,6 +4,7 @@
 #include "ComponentsGroup.h"
 #include "WoodenAllocators/AllocatorLinear.h"
 #include "GatherComponents.h"
+#include <algorithm>
 
 WECS_BEGIN
 
@@ -55,7 +56,7 @@ public:
 		return *allocTemp;
 	}
 
-	virtual void update(WECS* ecs) = 0;
+	inline virtual void update(WECS* ecs) = 0;
 
 	virtual void finish(WECS* ecs)
 	{
@@ -69,7 +70,7 @@ public:
 	template<typename F, typename... CompTs>
 	void for_each(F && func, const ComponentsGroup<CompTs...>& compGroup)
 	{
-		for_each(std::move(func), compGroup.cmp_type_list());
+		for_each(std::move(func), ComponentsGroup<CompTs...>::cmp_type_list());
 	}
 
 	template<typename F, typename... CompTs>
@@ -80,21 +81,21 @@ public:
 	}
 
 	template<typename F, typename HeadComponentT, typename... LeftComponentTs>
-	void for_each(F&& func, type_list<HeadComponentT, LeftComponentTs...>&&, uint16_t iStart = 0, uint16_t size = (uint16_t)-1)
+	void for_each(F&& func, type_list<HeadComponentT, LeftComponentTs...>&&, uint32_t iStart = 0, uint32_t size = (uint32_t)-1)
 	{
-		if (size == (uint16_t)-1)
+		if (size == (uint32_t)-1)
 		{
 			size = HeadComponentT::ecsData.size();
 		}
 
-		uint16_t end = iStart + size;
+		uint32_t end = iStart + size;
 		if (end > HeadComponentT::ecsData.size())
 		{
 			end = HeadComponentT::ecsData.size();
 		}
 
 		WGatherComponents<0, LeftComponentTs...> gather;
-		for (size_t hComp = iStart; hComp < iStart + size; ++hComp)
+		for (size_t hComp = iStart; hComp < end; ++hComp)
 		{
 			HeadComponentT& headComp = HeadComponentT::ecsData[hComp];
 			size_t hEntity = HeadComponentT::ecsData.getEntityHandle(hComp);
@@ -102,6 +103,29 @@ public:
 			{
 				func(hEntity, headComp, gather.getComp<LeftComponentTs>()...);
 			}
+		}
+	}
+
+	template<typename F, typename HeadComponentT>
+	void for_each(F&& func, type_list<HeadComponentT>&&, uint32_t iStart = 0, uint32_t size = (uint32_t)-1)
+	{
+		if (size == (uint32_t)-1)
+		{
+			size = HeadComponentT::ecsData.size();
+		}
+
+		uint32_t end = iStart + size;
+		if (end > HeadComponentT::ecsData.size())
+		{
+			end = HeadComponentT::ecsData.size();
+		}
+
+		
+		for (size_t hComp = iStart; hComp < end; ++hComp)
+		{
+			HeadComponentT& headComp = HeadComponentT::ecsData[hComp];
+			size_t hEntity = HeadComponentT::ecsData.getEntityHandle(hComp);
+			func(hEntity, headComp);
 		}
 	}
 
@@ -117,7 +141,7 @@ public:
 	template<typename... CompTs>
 	ComponentsGroupSlice<CompTs...> queryComponentsGroupSlice(Slice slice)
 	{
-		ComponentsGroupSlice compsSlice = ComponentsGroupSlice<CompTs...>(std::move(slice));
+		ComponentsGroupSlice<CompTs...> compsSlice = ComponentsGroupSlice<CompTs...>(std::move(slice));
 		return compsSlice;
 	}
 
@@ -130,23 +154,27 @@ public:
 class JobParallazible: public Job
 {
 public:
-	JobParallazible(uint16_t numThreads=0):
+	JobParallazible(uint32_t numThreads=0):
 		nThreads(numThreads)
 	{}
 
 	virtual void run(WECS* ecs) override
 	{
-		updateNStartThreads(1);
+		nThreads = updateNStartThreads(1);
+		if (nThreads <= 0)
+		{
+			nThreads = 1;
+		}
 		update(ecs);
 		finish(ecs);
 	}
 
-	void update(WECS* ecs) override
+	inline void update(WECS* ecs) override
 	{
 		update(ecs, 0);
 	}
 
-	virtual void update(WECS* ecs, uint8_t iThread) = 0;
+	inline virtual void update(WECS* ecs, uint8_t iThread) = 0;
 
 
 	bool isParallazible() const override
@@ -154,14 +182,17 @@ public:
 		return true;
 	}
 
-	virtual void updateNStartThreads(uint32_t nWorkThreads){}
+	virtual uint32_t updateNStartThreads(uint32_t nWorkThreads){
+		return nThreads;
+	}
 
-	uint16_t getNumThreads() const
+	uint32_t getNumThreads() const
 	{
 		return nThreads;
 	}
 
-	uint8_t nThreads;
+protected:
+	uint32_t nThreads;
 };
 
 template<typename... CompTs>
@@ -175,16 +206,24 @@ public:
 
 	uint32_t sliceSize;
 
-	void updateNStartThreads(uint32_t nWorkThreads) final
+	uint32_t updateNStartThreads(uint32_t nWorkThreads) final
 	{
 		uint32_t nEntities = queryComponentsGroup<CompTs...>().size();
-		nThreads = std::min(nWorkThreads, (nEntities+sliceSize-1)/sliceSize);
+		if (nWorkThreads < (nEntities + sliceSize - 1) / sliceSize)
+		{
+			return nWorkThreads;
+		}
+		else
+		{
+			return (nEntities + sliceSize - 1) / sliceSize;
+		}
+		//return min(nWorkThreads, (nEntities+sliceSize-1)/sliceSize);
 	}
 
 	void update(WECS* ecs, uint8_t iThread) final
 	{
 		uint32_t nRequests = queryComponentsGroup<CompTs...>().size();
-		uint32_t sliceSize = (nRequests + nThreads - 1) / nThreads;
+		uint32_t sliceSize = (nRequests + getNumThreads()-1) /getNumThreads();
 
 		ComponentsGroupSlice<CompTs...> compsGroup =
 			queryComponentsGroupSlice<CompTs...>(Slice(iThread * sliceSize, sliceSize));

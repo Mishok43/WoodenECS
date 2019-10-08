@@ -9,13 +9,13 @@ struct Slice
 {
 	Slice() = default;
 
-	Slice(uint16_t iStart, uint16_t size):
+	Slice(uint32_t iStart, uint32_t size):
 		iStart(iStart),
 		size(size)
 	{ }
 
-	uint16_t iStart;
-	uint16_t size;
+	uint32_t iStart;
+	uint32_t size;
 };
 
 template<typename HeadCompT, typename... LeftCompTs>
@@ -34,11 +34,11 @@ public:
 	template<typename CompT=HeadCompT>
 	HEntity getEntity(uint32_t i) const
 	{
-		return  HEntity(CompT::ecsData.getEntityHandle<CompT>(i));
+		return  HEntity(CompT::ecsData.getEntityHandle(i));
 	}
 
 	template<typename CompT = HeadCompT>
-	const uint16_t size() const
+	const uint32_t size() const
 	{
 		return CompT::ecsData.size();
 	}

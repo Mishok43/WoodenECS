@@ -34,7 +34,7 @@ public:
 		destructor = rawDestroyObj<T>;
 
 		uint16_t objSize = sizeof(T);
-		compData.init(objSize, 0, objSize);
+		compData.init(objSize, 0, alignof(T));
 	}
 
 	void clear()
@@ -50,7 +50,7 @@ public:
 	void reserve(uint32_t numObjects)
 	{
 		uint16_t objSize = compData.getBlkSize();
-		compData.init(objSize, numObjects, objSize);
+		compData.init(objSize, numObjects, compData.getAlignment());
 
 		if constexpr (true)
 		{
@@ -82,11 +82,10 @@ public:
 	template<typename T, typename ...Args>
 	T& append(size_t hEntity, Args&&... args)
 	{
-		T* obj = (T*)compData.allocMem();
+		T* obj = compData.allocMem<T>();
 		assert(obj);
 
 		rawConstructObj<T>(obj, std::forward<Args>(args)...);
-
 
 		size_t iObj = compData.getPos(obj);
 		if constexpr (false)
@@ -120,18 +119,16 @@ public:
 
 		size_t iSwapObj = compData.freeMem(obj);
 
-		if constexpr (true)
-		{
-			entities[hComp] = entities[iSwapObj];
-			assert(entities[iSwapObj] = (size_t)-1);
-		}
-
 		if (hComp == compData.getNumUsedBlks())
 		{
 			iSwapObj = INVALID_HANDLE;
+			return INVALID_HANDLE;
 		}
-
-		return iSwapObj;
+		else
+		{
+			entities[hComp] = entities[iSwapObj];	
+			return entities[iSwapObj];
+		}
 	}
 
 	inline size_t getEntityHandle(uint32_t hComp) const
@@ -142,6 +139,7 @@ public:
 		}
 		else
 		{
+			assert(hComp < size());
 			assert(entities);
 			return entities[hComp];
 		}

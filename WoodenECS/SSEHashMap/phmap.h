@@ -681,7 +681,7 @@ inline void SanitizerUnpoisonObject(const T* object) {
 // Alignment must be a power of 2. It must be positive.
 //
 // Note that many allocators don't honor alignment requirements above certain
-// threshold (usually either alignof(std::max_align_t) or alignof(void*)).
+// threshold (usually either alignof(max_align_t) or alignof(void*)).
 // Allocate() doesn't apply alignment corrections. If the underlying allocator
 // returns insufficiently alignment pointer, that's what you are going to get.
 // ----------------------------------------------------------------------------

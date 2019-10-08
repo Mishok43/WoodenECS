@@ -77,10 +77,10 @@ public:
 		size_t hEntity = compStorage->getEntityHandle(hComp);
 		indices[hEntity] = INVALID_HANDLE;
 
-		size_t hSwappedEntity = compStorage->remove(hComp);
-		if (hSwappedEntity != INVALID_HANDLE)
+		size_t hSwapped = compStorage->remove(hComp);
+		if (hSwapped != INVALID_HANDLE)
 		{
-			indices[hSwappedEntity] = hComp;
+			indices[hSwapped] = hComp;
 		}
 
 		return hComp;
@@ -148,8 +148,7 @@ public:
 		{
 			return INVALID_HANDLE;
 		}
-
-		iEntity->second = INVALID_HANDLE;
+		indices.erase(iEntity);
 		size_t hSwappedEntity = compStorage->remove(deadPos);
 		if (hSwappedEntity != INVALID_HANDLE)
 		{
@@ -167,12 +166,13 @@ public:
 		}
 
 		size_t hEntity = compStorage->getEntityHandle(hComp);
-		indices[hEntity] = INVALID_HANDLE;
+		indices.erase(indices.find(hEntity));
+		//indices[hEntity] = INVALID_HANDLE;
 
-		size_t hSwappedEntity = compStorage->remove(hComp);
-		if (hSwappedEntity != INVALID_HANDLE)
+		size_t hSwapped = compStorage->remove(hComp);
+		if (hSwapped != INVALID_HANDLE)
 		{
-			indices[hSwappedEntity] = hComp;
+			indices[hSwapped] = hComp;
 		}
 
 		return hComp;

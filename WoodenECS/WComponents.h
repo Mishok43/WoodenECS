@@ -19,7 +19,7 @@ WECS_BEGIN
 using FDestroy = std::function<void(void*)>;
 using FCreate = std::function<void(size_t, void*)>;
 
-template<typename ComponentT, uint16_t defNumObjects,typename IntexTableT>
+template<typename ComponentT, uint16_t defNumObjects,typename IndexTableT>
 class WComponents: public HComponentStorage<ComponentT>
 {
 public:
@@ -45,7 +45,7 @@ public:
 		size_t hComp = indices.get(hEntity);
 		if (hComp != INVALID_HANDLE)
 		{
-			return CompStorageT::getRaw(hComp);
+			return this->getRaw(hComp);
 		}
 		else
 		{
@@ -92,7 +92,7 @@ public:
 		}
 	}
 
-	IntexTableT indices;
+	IndexTableT indices;
 
 	std::vector<FCreate> createFuncs;
 	std::vector<FDestroy> destroyFuncs;
@@ -100,7 +100,7 @@ public:
 
 #define DECL_MANAGED_DENSE_COMP_DATA(ComponentT, defNumObjects) \
 public:\
-using CompStorageT = typename WComponents<ComponentT, defNumObjects, DIndexTableFlat>; \
+using CompStorageT = typename WComponents<ComponentT, defNumObjects, DIndexTableHash>; \
 static CompStorageT ecsData;
 //private:\
 //friend class wecs::WECS;
@@ -109,7 +109,7 @@ static CompStorageT ecsData;
 
 #define DECL_MANAGED_FLAT_COMP_DATA(ComponentT, defNumObjects) \
 public:\
-using CompStorageT = typename WComponents<ComponentT, defNumObjects,DIndexTableHash>; \
+using CompStorageT = typename WComponents<ComponentT, defNumObjects,DIndexTableFlat>; \
 static CompStorageT ecsData;
 //private:\
 //friend class wecs::WECS;

@@ -100,10 +100,8 @@ template<typename ST, typename TypeListT, typename TimeT>
 constexpr bool has_cmp_update = has_cmp_update_s<ST, TimeT, TypeListT>::value;
 
 
-void hEntityTest(HEntity hEntity)
-{
-}
-
+inline void hEntityTest(HEntity hEntity)
+{}
 
 template<typename T>
 constexpr decltype(hEntityTest(std::declval<T>().hEntity), true) has_hentity_inside_comp_f(int) {return true;}
